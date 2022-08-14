@@ -70,7 +70,7 @@ function do_post(url, body) {
   })
   .then((response) => {
     if (!response.ok)
-      throw 'status is not 200';
+      throw new Error('status is not 200');
     return response.json();
 //    return response.text();
 //    return response.blob();
@@ -89,7 +89,7 @@ function do_post_urlencoded(url, params) {
   })
   .then((response) => {
     if (!response.ok)
-      throw 'status is not 200';
+      throw new Error('status is not 200');
     return response.json();
 //    return response.text();
 //    return response.blob();
@@ -106,7 +106,7 @@ function do_post_formdata(url, params) {
   })
   .then((response) => {
     if (!response.ok)
-      throw 'status is not 200';
+      throw new Error('status is not 200');
     return response.json();
 //    return response.text();
 //    return response.blob();
@@ -124,7 +124,7 @@ function do_get(url, qs) {
   })
   .then((response) => {
     if (!response.ok)
-      throw 'status is not 200';
+      throw new Error('status is not 200');
     return response.json();
 //    return response.text();
 //    return response.blob();
