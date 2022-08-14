@@ -1,0 +1,7 @@
+[
+	{
+		"enable": true,
+		"topic": "iotdashboard/#",
+		"handler": "mqtt_handler"
+	}
+]

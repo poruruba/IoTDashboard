@@ -1,0 +1,7 @@
+[
+  {
+    "enable": true,
+    "schedule": "0 */3 * * * *",
+    "param": "Hello World"
+  }
+]

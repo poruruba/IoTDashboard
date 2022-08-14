@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src * data: gap: https://ssl.gstatic.com 'unsafe-eval' 'unsafe-inline'; style-src * 'unsafe-inline'; media-src *; img-src * data: content: blob:;">
+  <meta name="format-detection" content="telephone=no">
+  <meta name="msapplication-tap-highlight" content="no">
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
+
+  <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+  <script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha384-nvAa0+6Qg9clwYCGGPpDQLVpLNn0fRaROjHqs13t4Ggj3Ez50XnGQqc/r8MhnRDZ" crossorigin="anonymous"></script>
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
+  <!-- Optional theme -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap-theme.min.css" integrity="sha384-6pzBo3FDv/PJ8r2KRkGHifhEocL+1X2rVCTTkUfGk7/0pbek5mMa1upzvWbrUbOZ" crossorigin="anonymous">
+  <!-- Latest compiled and minified JavaScript -->
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd" crossorigin="anonymous"></script>
+
+  <link rel="stylesheet" href="css/start.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/spinkit/2.0.1/spinkit.min.css" />
+  <script src="js/methods_bootstrap.js"></script>
+  <script src="js/components_bootstrap.js"></script>
+  <script src="js/components_utils.js"></script>
+  <script src="js/vue_utils.js"></script>
+  <script src="js/gql_utils.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/vconsole/dist/vconsole.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.7/dat.gui.min.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@1.0.0"></script>
+  <script src="https://cdn.jsdelivr.net/npm/ejs@3.1.8/ejs.min.js"></script>
+
+  <title>IoT Dashboard</title>
+</head>
+<body>
+<!--
+    <div id="loader-background">
+      <div class="sk-plane sk-center"></div>
+    </div>
+-->
+    <div id="top" class="container-fluid">
+        <div class="jumbotron">
+          <a class="pull-right" href="index.html">管理ページ</a>
+          <h1>{{dashboard.title}}</h1>
+          <p>{{dashboard.description}}</p>
+        </div>
+
+        <div class="row">
+          <div v-for="(item, index) in widgets" v-bind:class="item.col_size">
+            <div class="panel panel-primary">
+              <div class="panel-heading"><h1 class="panel-title">{{item.title}}</h1></div>
+              <div class="panel-body">
+                <p>{{item.description}}</p>
+
+                <div v-if="item.type=='TextArea'">
+                  <div v-html="item.html"></div>
+                </div>
+
+                <div v-if="item.type=='Multiline'">
+                  <div class="form-inline">
+                    <div v-if="item.range_type=='between'">
+                      <comp_datetime class="pull-right" v-model.number="item.end_datetime"></comp_datetime>
+                      <comp_datetime class="pull-right" v-model.number="item.start_datetime"></comp_datetime>
+                    </div>
+                    <select v-else-if="item.range_type=='latest'" class="form-control pull-right" v-model="item.last_type">
+                      <option value="1hour">last 1hour</option>
+                      <option value="3hour">last 3hour</option>
+                      <option value="1day">last 1day</option>
+                      <option value="1week">last 1week</option>
+                      <option value="1month">last 1month</option>
+                    </select>
+                    <select class="form-control pull-right" v-model="item.range_type" v-on:change="range_type_update(index)">
+                      <option value="latest">latest</option>
+                      <option value="between">between</option>
+                    </select>
+                    <button class="btn btn-default btn-sm pull-right" v-on:click="widget_update(index)">update</button>
+                  </div>
+                  <canvas v-bind:id="'chart_' + index"></canvas>
+                </div>
+
+                <div v-if="item.type=='GaugeMeter'">
+                  <canvas v-bind:id="'chart_' + index"></canvas>
+                  <p class="text-center"><font size="7">{{item.latest_value}}</font> <font size='5'>{{item.unit}}</font></p>
+                </div>
+
+                <div v-if="item.type=='SignalSign'">
+                  <svg class="center-block" v-bind:width="item.circle_size" v-bind:height="item.circle_size">
+                    <circle v-bind:cx="item.circle_size / 2" v-bind:cy="item.circle_size / 2" v-bind:r="item.circle_size / 2" v-bind:fill="item.latest_color" />
+                  </svg>
+                  <p class="text-center"><font size='7'>{{item.latest_value}}</font> <font size='5'>{{item.unit}}</font></p>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </div>
+
+        
+        <!-- for progress-dialog -->
+        <progress-dialog v-bind:title="progress_title"></progress-dialog>
+    </div>
+
+    <script src="js/comp/comp_datetime.js"></script>
+    <script src="js/start_viewer.js"></script>
+</body>

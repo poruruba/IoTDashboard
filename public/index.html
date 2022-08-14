@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src * data: gap: https://ssl.gstatic.com 'unsafe-eval' 'unsafe-inline'; style-src * 'unsafe-inline'; media-src *; img-src * data: content: blob:;">
+  <meta name="format-detection" content="telephone=no">
+  <meta name="msapplication-tap-highlight" content="no">
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
+
+  <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+  <script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha384-nvAa0+6Qg9clwYCGGPpDQLVpLNn0fRaROjHqs13t4Ggj3Ez50XnGQqc/r8MhnRDZ" crossorigin="anonymous"></script>
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
+  <!-- Optional theme -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap-theme.min.css" integrity="sha384-6pzBo3FDv/PJ8r2KRkGHifhEocL+1X2rVCTTkUfGk7/0pbek5mMa1upzvWbrUbOZ" crossorigin="anonymous">
+  <!-- Latest compiled and minified JavaScript -->
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd" crossorigin="anonymous"></script>
+
+  <link rel="stylesheet" href="css/start.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/spinkit/2.0.1/spinkit.min.css" />
+  <script src="js/methods_bootstrap.js"></script>
+  <script src="js/components_bootstrap.js"></script>
+  <script src="js/components_utils.js"></script>
+  <script src="js/vue_utils.js"></script>
+  <script src="js/gql_utils.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/vconsole/dist/vconsole.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.7/dat.gui.min.js"></script>
+
+  <title>IoT Dashboard Manager</title>
+</head>
+<body>
+<!--
+    <div id="loader-background">
+      <div class="sk-plane sk-center"></div>
+    </div>
+-->
+    <div id="top" class="container-fluid">
+        <h1>IoT Dashboard Manager</h1>
+        <hr>
+
+        <div class="rows">
+          <!-- サイドバー -->
+          <div class="col-md-3">
+            <ul class="nav nav-pills nav-stacked">
+              <li class="active"><a href="#channels" data-toggle="tab"><i class="glyphicon glyphicon-folder-open"></i> Channels</a></li>
+              <li><a href="#dashboards" data-toggle="tab"><i class="glyphicon glyphicon-folder-open"></i> Dashboards</a></li>
+            </ul> 
+          </div>
+
+          <!-- メインページ -->
+          <div class="col-md-9">
+            <div class="tab-content">
+
+              <!-- チャネル管理 -->
+              <div id="channels" class="tab-pane fade in active">
+                <button class="btn btn-default pull-right" v-on:click="channel_create_open">Create Channel</button>
+                <h2>Channels</h2>
+                <br>
+
+                <div class="panel panel-primary" v-for="(item, index) in channel_list">
+                  <div class="panel-heading">
+                    <button class="btn btn-default btn-sm pull-right" v-on:click="channel_datum_view(index)">view</button>
+                    <button class="btn btn-default btn-sm pull-right" v-on:click="channel_delete(index)">delete</button>
+                    <button class="btn btn-default btn-sm pull-right" v-on:click="channel_edit_open(index)">edit</button>
+                    <div class="panel-title"><label><big>{{item.name}}</big></label></div>
+                  </div>
+                  <div class="panel-body">
+                    <p>{{item.description}}</p>
+                    <table class="table table-striped">
+                      <thead>
+                        <tr>
+                          <th>name</th><th>description</th><th>type</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr v-for="(item2, index2) in item.resources">
+                          <td>{{item2.name}}</td><td>{{item2.description}}</td><td>{{item2.type}}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <div class="pull-right">
+                      <label>created_at</label> {{toDatetimeString(item.created_at)}} <label>updated_at</label> {{toDatetimeString(item.updated_at)}}<br>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ダッシュボード管理 -->
+              <div id="dashboards" class="tab-pane fade in">
+                <button class="btn btn-default pull-right" v-on:click="dashboard_create_open">Create Dashboard</button>
+                <h2>Dashboards</h2>
+                <br>
+
+                <div class="panel panel-primary" v-for="(item, index) in dashboard_list">
+                  <div class="panel-heading">
+                    <a class="btn btn-default btn-sm pull-right" v-bind:href="'viewer.html?dashboard=' + item.id" rel="nofollow noopener noreferrer" target="_blank">view</a>
+                    <button class="btn btn-default btn-sm pull-right" v-on:click="dashboard_delete(index)">delete</button>
+                    <button class="btn btn-default btn-sm pull-right" v-on:click="dashboard_edit_open(index)">edit</button>
+                    <div class="panel-title"><label><big>{{item.title}}</big></label></div>
+                  </div>
+                  <div class="panel-body">
+                    <p>{{item.description}}</p>
+                    <label>id</label> {{item.id}}
+                    <table class="table table-striped">
+                      <thead>
+                        <tr>
+                          <th>title</th><th>size</th><th>type</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr v-for="(item2, index2) in item.widgets">
+                          <td>{{item2.title}}</td><td>{{item2.size}}%</td><td>{{item2.type}}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <div class="pull-right">
+                      <label>created_at</label> {{toDatetimeString(item.created_at)}} <label>updated_at</label> {{toDatetimeString(item.updated_at)}}<br>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- データ表示ダイアログ -->
+          <div class="modal fade" id="datum_view_dialog">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h4 class="modal-title" v-if="datum_channel">{{datum_channel.name}}</h4>
+                  </div>
+                  <div class="modal-body">
+                    <div class="form-inline">
+                      <label>limit</label> <select class="form-control" v-model.number="datum_limit" v-on:change="datum_change_limit">
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                        <option value="300">300</option>
+                      </select>
+                    </div>
+                    <table class="table table-striped" v-if="datum_channel">
+                      <thead>
+                        <tr>
+                          <th v-for="(item, index) in datum_channel.resources">{{item.name}}</th><th>created_at</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr v-for="(item, index) in datum_data_list">
+                          <td v-for="(item2, index2) in datum_channel.resources">{{item.json[item2.name]}}</td><td>{{toDatetimeString(item.created_at)}}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <div class="modal-footer">
+                    <button class="btn btn-default" v-on:click="dialog_close('#datum_view_dialog')">Close</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- チャネル編集ダイアログ -->
+          <div class="modal fade" id="channel_edit_dialog">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                      <h4 v-if="channel_edit_mode=='new'" class="modal-title">Create a new channel</h4>
+                      <h4 v-else class="modal-title">Edit channel properties</h4>
+                    </div>
+                    <div class="modal-body">
+                      <div class="form-group">
+                        <label>name</label>
+                        <input v-if="channel_edit_mode=='new'" type="text" class="form-control" v-model="channel_edit.name">
+                        <span v-else>{{channel_edit.name}}</span>
+                      </div>
+                      <div class="form-group">
+                        <label>description</label>
+                        <textarea class="form-control" rows="2" v-model="channel_edit.description"></textarea>
+                      </div>
+                      <div class="panel panel-default">
+                        <div class="panel-heading">Configure resources</div>
+                        <div class="panel-body">
+                          <div v-for="(item, index) in channel_edit.resources" class="row">
+                            <div class="col-sm-3">
+                              <input type="text" class="form-control" v-model="item.name" placeholder="name">
+                            </div>
+                            <div class="col-sm-5">
+                              <input type="text" class="form-control" v-model="item.description" placeholder="description">
+                            </div>
+                            <div class="col-sm-3">
+                            </div>
+                            <div class="col-sm-1">
+                              <button class="btn btn-default btn-sm" v-on:click="channel_edit_remove_resource(index)">X</button>
+                            </div>
+                          </div>
+                          <button class="btn btn-default" v-on:click="channel_edit_new_resource">+Resource</button>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="modal-footer">
+                      <button class="btn btn-default" v-on:click="dialog_close('#channel_edit_dialog')">Cancel</button>
+                      <button v-if="channel_edit_mode=='new'" class="btn btn-primary" v-on:click="channel_create_save">Create channel</button>
+                      <button v-else class="btn btn-primary" v-on:click="channel_edit_save">Save</button>
+                    </div>
+                </div>
+            </div>
+          </div>
+
+          <!-- ダッシュボード編集ダイアログ -->
+          <div class="modal fade" id="dashboard_edit_dialog">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 v-if="dashboard_edit_mode=='create'" class="modal-title">Create a new dashboard</h4>
+                        <h4 v-else class="modal-title">Edit dashboard properties</h4>
+                    </div>
+                    <div class="modal-body">
+                      <div class="form-group">
+                        <label>title</label>
+                        <input type="text" class="form-control" v-model="dashboard_edit.title">
+                      </div>
+                      <div class="form-group">
+                        <label>description</label>
+                        <textarea class="form-control" rows="2" v-model="dashboard_edit.description"></textarea>
+                      </div>
+                      <div class="panel panel-default">
+                        <div class="panel-heading">Configure widgets</div>
+                        <div class="panel-body">
+                          <table class="table table-striped">
+                            <thead>
+                              <tr><th>title</th><th>size</th><th>type</th><th>action</th></tr>
+                            </thead>
+                            <tbody>
+                              <tr v-for="(item, index) in dashboard_edit.widgets">
+                                <td>{{item.title}}</td><td>{{item.size}}%</td><td>{{item.type}}</td>
+                                <td>
+                                  <button class="btn btn-default btn-sm" v-on:click="dashboard_edit_edit_widget(index)">Edit</button>
+                                  <button class="btn btn-default btn-sm" v-on:click="dashboard_edit_delete_widget(index)">Delete</button>
+                                  <button class="btn btn-default btn-sm" v-on:click="dashboard_edit_order_widget(index, false)">↑</button>
+                                  <button class="btn btn-default btn-sm" v-on:click="dashboard_edit_order_widget(index, true)">↓</button>
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
+                          <div class="btn-group" v-if="!dashboard_widget.type">
+                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                              + Add Widget <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu">
+                              <li><a v-on:click="dashboard_edit_new_widget('TextArea')">Text Area</a></li>
+                              <li><a v-on:click="dashboard_edit_new_widget('Multiline')">Multi-line Chart</a></li>
+                              <li><a v-on:click="dashboard_edit_new_widget('GaugeMeter')">Gauge Meter</a></li>
+                              <li><a v-on:click="dashboard_edit_new_widget('SignalSign')">Signal Sign</a></li>
+                            </ul>
+                          </div>
+                          <div class="panel panel-default" v-if="dashboard_widget.type">
+                            <!-- ダッシュボード共通部 -->
+                            <div class="panel-body">
+                              <div class="form-inline">
+                                <label>type</label> {{dashboard_widget.type}}
+                              </div>
+                              <div class="form-inline">
+                                <label>Size</label>
+                                <select class="form-control" v-model.number="dashboard_widget.size">
+                                  <option value="16">Very small (16% wide)</option>
+                                  <option value="25">Small (25% wide)</option>
+                                  <option value="33">Medium (33% wide)</option>
+                                  <option value="50">Large (50% wide)</option>
+                                  <option value="100">Full width (100% wide)</option>
+                                </select>
+                              </div>
+                              <div class="form-group">
+                                <label>title</label>
+                                <input type="text" class="form-control" v-model="dashboard_widget.title">
+                              </div>
+                              <div class="form-group">
+                                <label>description</label>
+                                <input type="text" class="form-control" v-model="dashboard_widget.description">
+                              </div>
+
+                              <!-- TextArea -->
+                              <div v-if="dashboard_widget.type=='TextArea'">
+                                <div class="form-inline">
+                                  <label>include channels</label>
+                                  <select class="form-control" v-model="dashboard_widget.channels" multiple>
+                                    <option v-for="(item, index) in channel_list" v-bind:value="item.name">{{item.name}}</option>
+                                  </select>
+                                </div>
+                                <div class="form-group">
+                                  <label>Your Text (accepts HTML)</label>
+                                  <textarea class="form-control" v-model="dashboard_widget.text" rows="2"></textarea>
+                                </div>
+                              </div>
+
+                              <!-- Multiline -->
+                              <div v-else-if="dashboard_widget.type=='Multiline'">
+                                <table class="table table-striped">
+                                  <thead>
+                                    <tr><th>channel</th><th>resource</th><th>label</th><th>color</th><th>stepped</th><th>action</th></tr>
+                                  </thead>
+                                  <tbody>
+                                    <tr v-for="(item, index) in dashboard_widget.lines">
+                                      <td>{{item.channel}}</td><td>{{item.resource}}</td><td>{{item.label}}</td><td>{{item.color}}</td><td>{{item.stepped}}</td>
+                                      <td>
+                                        <button class="btn btn-default btn-sm" v-on:click="dashboard_edit_edit_line(index)">edit</button> <button class="btn btn-default btn-sm" v-on:click="dashboard_edit_delete_line(index)">delete</button>
+                                      </td>
+                                    </tr>
+                                  </tbody>
+                                </table>
+                                <button class="btn btn-default" v-on:click="dashboard_edit_add_line_open" v-if="!dashboard_line">+ Add Line</button>
+                                <div class="panel panel-default" v-if="dashboard_line">
+                                  <div class="panel-body">
+                                    <div class="form-inline">
+                                      <label>Label</label> <input type="text" class="form-control" v-model="dashboard_line.label">
+                                    </div>
+                                    <div class="form-inline">
+                                      <label>Color</label> <input type="color" v-model="dashboard_line.color"> {{dashboard_line.color}}
+                                    </div>
+                                    <div class="form-inline">
+                                      <label>Stepped</label> <input type="checkbox" v-model="dashboard_line.stepped">
+                                    </div>
+                                    <div class="form-inline">
+                                      <label>Channel</label>
+                                      <select class="form-control" v-model="dashboard_line.channel" v-on:change="dashboard_edit_line_select_change_channel">
+                                        <option v-for="(item, index) in channel_list" v-bind:value="item.name">{{item.name}}</option>
+                                      </select>
+                                    </div>
+                                    <div class="form-inline">
+                                      <label>Resource</label>
+                                      <select class="form-control" v-model="dashboard_line.resource">
+                                        <option v-for="(item, index) in resource_list" v-bind:value="item.name">{{item.name}}</option>
+                                      </select>
+                                    </div>
+                                    <button class="btn btn-primary pull-right" v-on:click="dashboard_edit_add_line_save"><span v-if="dashboard_edit_line_index<0">Add</span><span v-else>Edit</span></button>
+                                    <button class="btn btn-default pull-right" v-on:click="dashboard_line=null">Cancel</button>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <!-- GaugeMeter -->
+                              <div v-else-if="dashboard_widget.type=='GaugeMeter'">
+                                <div class="form-inline">
+                                  <label>Color</label> <input type="color" v-model="dashboard_widget.color"> {{dashboard_widget.color}}
+                                </div>
+                                <div class="form-inline">
+                                  <label>Maximum Value</label> <input type="number" class="form-control" v-model.number="dashboard_widget.maximum">
+                                </div>
+                                <div class="form-inline">
+                                  <label>Channel</label>
+                                  <select class="form-control" v-model="dashboard_widget.channel" v-on:change="dashboard_edit_select_change_channel">
+                                    <option v-for="(item, index) in channel_list" v-bind:value="item.name">{{item.name}}</option>
+                                  </select>
+                                </div>
+                                <div class="form-inline">
+                                  <label>Resource</label>
+                                  <select class="form-control" v-model="dashboard_widget.resource">
+                                    <option v-for="(item, index) in resource_list" v-bind:value="item.name">{{item.name}}</option>
+                                  </select>
+                                </div>
+                                <div class="form-inline">
+                                  <label>Unit</label> <input type="text" class="form-control" v-model.number="dashboard_widget.unit">
+                                </div>
+                              </div>
+
+                              <!-- SignalSign -->
+                              <div v-else-if="dashboard_widget.type=='SignalSign'">
+                                <div class="form-inline">
+                                  <table class="table">
+                                    <thead>
+                                      <tr><th>threshold</th><th>color</th></tr>
+                                    </thead>
+                                    <tbody>
+                                      <tr v-for="(item, index) in dashboard_widget.signals">
+                                        <td>~ <input type="number" class="form-control" v-model.number="item.value"></td><td><input type="color" v-model="item.color"></td>
+                                    </tbody>
+                                  </table>
+                                </div>
+                                <div class="form-inline">
+                                  <label>Circle Size</label>
+                                  <input type="number" class="form-control" v-model.number="dashboard_widget.circle_size">
+                                </div>
+                                <div class="form-inline">
+                                  <label>Channel</label>
+                                  <select class="form-control" v-model="dashboard_widget.channel" v-on:change="dashboard_edit_select_change_channel">
+                                    <option v-for="(item, index) in channel_list" v-bind:value="item.name">{{item.name}}</option>
+                                  </select>
+                                </div>
+                                <div class="form-inline">
+                                  <label>Resource</label>
+                                  <select class="form-control" v-model="dashboard_widget.resource">
+                                    <option v-for="(item, index) in resource_list" v-bind:value="item.name">{{item.name}}</option>
+                                  </select>
+                                </div>
+                                <div class="form-inline">
+                                  <label>Unit</label> <input type="text" class="form-control" v-model.number="dashboard_widget.unit">
+                                </div>
+                              </div>
+
+                              <button v-if="dashboard_edit_widget_index<0" class="btn btn-primary pull-right" v-on:click="dashboard_edit_add_widget">Add</button>
+                              <button v-else class="btn btn-primary pull-right" v-on:click="dashboard_edit_modify_widget">Edit</button>
+                              <button class="btn btn-default pull-right" v-on:click="dashboard_widget.type=null">Cancel</button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="modal-footer" v-if="!dashboard_widget.type">
+                      <button class="btn btn-default" v-on:click="dialog_close('#dashboard_edit_dialog')">Cancel</button>
+                      <button v-if="dashboard_edit_mode=='create'" class="btn btn-primary" v-on:click="dashboard_create_save">Create dashboard</button>
+                      <button v-else class="btn btn-primary" v-on:click="dashboard_edit_save">Save</button>
+                    </div>
+                </div>
+            </div>
+
+          </div>
+
+
+        </div>
+
+        <!-- for progress-dialog -->
+        <progress-dialog v-bind:title="progress_title"></progress-dialog>
+    </div>
+
+    <script src="js/start.js"></script>
+</body>
