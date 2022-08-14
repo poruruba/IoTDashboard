@@ -12,7 +12,7 @@ usage<br>
 <pre>
 MQTT_BROKER_URL=mqtt://[MQTT Broker Host Name]:1883
 DB_HOST=[MySQL Server Host Name]
-DB_PORT=[MySQL Server Port Number]
+DB_PORT=3306
 DB_USER=[MySQL User Name]
 DB_PASSWORD=[MySQL User Password]
 DB_DATABASE=[MySQL Database Name]
