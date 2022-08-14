@@ -15,7 +15,7 @@ const Headers = fetch.Headers;
 const base_url = '【立ち上げたNode.jsサーバのURL】';
 
 const SNMP_AGENT_HOST = "【監視対象のSNMPエージェントのホスト名】";
-const SNMP_TARGET_OID = "【監視対象のSNMPのOID"; /* 1.3.6.1.4.1.6574.1.2.0 など */
+const SNMP_TARGET_OID = "【監視対象のSNMPのOID】"; /* 1.3.6.1.4.1.6574.1.2.0 など */
 
 // switchbot.getDeviceList()
 // .then(async json =>{
