@@ -36,6 +36,7 @@ var vue_options = {
                                     type: 'time',
                                 },
                             },
+                            aspectRatio: 1
                         },
                     });
                 }
